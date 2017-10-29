@@ -56,11 +56,11 @@ cd /home/vagrant
 #
 # Install Hadoop
 #
-echo "curl -sLko /tmp/hadoop-2.7.3.tar.gz http://apache.osuosl.org/hadoop/common/hadoop-2.7.3/hadoop-2.7.3.tar.gz"
-curl -sLko /tmp/hadoop-2.7.3.tar.gz http://apache.osuosl.org/hadoop/common/hadoop-2.7.3/hadoop-2.7.3.tar.gz
+echo "curl -sLko /tmp/hadoop-2.8.2.tar.gz http://apache.osuosl.org/hadoop/common/hadoop-2.8.2/hadoop-2.8.2.tar.gz"
+curl -sLko /tmp/hadoop-2.8.2.tar.gz http://apache.osuosl.org/hadoop/common/hadoop-2.8.2/hadoop-2.8.2.tar.gz
 mkdir -p /home/vagrant/hadoop
 cd /home/vagrant/
-tar -xvf /tmp/hadoop-2.7.3.tar.gz -C hadoop --strip-components=1
+tar -xvf /tmp/hadoop-2.8.2.tar.gz -C hadoop --strip-components=1
 
 echo '# Hadoop environment setup' | sudo tee -a /home/vagrant/.bash_profile
 export HADOOP_HOME=/home/vagrant/hadoop
