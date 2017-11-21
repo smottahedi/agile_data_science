@@ -79,31 +79,34 @@ DEFAULT_REGION=`aws configure get region`
 echo "The default region is '$DEFAULT_REGION'" | tee -a $LOG_FILE
 
 # There are no associative arrays in bash 3 (Mac OS X) :(
+# Ubuntu 17.04 zesty hvm:ebs-ssd
 echo "Determining the image ID to use according to region..." | tee -a $LOG_FILE
 case $DEFAULT_REGION in
-  ap-south-1) UBUNTU_IMAGE_ID=ami-4d542222
+  ap-south-1) UBUNTU_IMAGE_ID=ami-1d793672
   ;;
-  us-east-1) UBUNTU_IMAGE_ID=ami-4ae1fb5d
+  us-east-1) UBUNTU_IMAGE_ID=ami-fe9a1884
   ;;
-  ap-northeast-1) UBUNTU_IMAGE_ID=ami-65750502
+  ap-northeast-1) UBUNTU_IMAGE_ID=ami-31289957
   ;;
-  eu-west-1) UBUNTU_IMAGE_ID=ami-cbfcd2b8
+  eu-west-1) UBUNTU_IMAGE_ID=ami-978d27ee
   ;;
-  ap-southeast-1) UBUNTU_IMAGE_ID=ami-93a800f0
+  ap-southeast-1) UBUNTU_IMAGE_ID=ami-81a5f0e2
   ;;
-  us-west-1) UBUNTU_IMAGE_ID=ami-818fdfe1
+  us-west-1) UBUNTU_IMAGE_ID=ami-499ea729
   ;;
-  eu-central-1) UBUNTU_IMAGE_ID=ami-5175b73e
+  eu-central-1) UBUNTU_IMAGE_ID=ami-b52babda
   ;;
-  sa-east-1) UBUNTU_IMAGE_ID=ami-1937ac75
+  sa-east-1) UBUNTU_IMAGE_ID=ami-790b4e15
   ;;
-  ap-southeast-2) UBUNTU_IMAGE_ID=ami-a87c79cb
+  ap-southeast-2) UBUNTU_IMAGE_ID=ami-10ca2172
   ;;
-  ap-northeast-2) UBUNTU_IMAGE_ID=ami-9325f3fd
+  ap-northeast-2) UBUNTU_IMAGE_ID=ami-d2dd7abc
   ;;
-  us-west-2) UBUNTU_IMAGE_ID=ami-a41eaec4
+  us-west-2) UBUNTU_IMAGE_ID=ami-64c4171c
   ;;
-  us-east-2) UBUNTU_IMAGE_ID=ami-d5e7bdb0
+  us-east-2) UBUNTU_IMAGE_ID=ami-69341a0c
+  ;;
+  eu-west-2) UBUNTU_IMAGE_ID=ami-790d121d
   ;;
 esac
 echo "The image for region '$DEFAULT_REGION' is '$UBUNTU_IMAGE_ID' ..."
