@@ -3,7 +3,7 @@
 LOG_FILE="/tmp/ec2.sh.log"
 echo "Logging operations to '$LOG_FILE' ..."
 
-echo "" | tee -$LOG_FILE # first echo replaces previous log output, other calls append
+echo "" | tee -a $LOG_FILE # first echo replaces previous log output, other calls append
 echo "Welcome to Agile Data Science 2.0 :)" | tee -a $LOG_FILE
 echo "" | tee -a $LOG_FILE
 echo "I will launch an r3.xlarge instance in the default VPC for you, using a key and security group we will create." | tee -a $LOG_FILE
@@ -79,49 +79,54 @@ DEFAULT_REGION=`aws configure get region`
 echo "The default region is '$DEFAULT_REGION'" | tee -a $LOG_FILE
 
 # There are no associative arrays in bash 3 (Mac OS X) :(
-# Ubuntu 17.04 zesty hvm:ebs-ssd
+# Ubuntu 17.10 hvm:ebs-ssd
+# See https://cloud-images.ubuntu.com/locator/ec2/ if this needs fixing
 echo "Determining the image ID to use according to region..." | tee -a $LOG_FILE
 case $DEFAULT_REGION in
-  ap-south-1) UBUNTU_IMAGE_ID=ami-1d793672
+  ap-south-1) UBUNTU_IMAGE_ID=ami-94e4b5fb
   ;;
-  us-east-1) UBUNTU_IMAGE_ID=ami-fe9a1884
+  us-east-1) UBUNTU_IMAGE_ID=ami-28516d52
   ;;
-  ap-northeast-1) UBUNTU_IMAGE_ID=ami-31289957
+  ap-northeast-1) UBUNTU_IMAGE_ID=ami-49640b2f
   ;;
-  eu-west-1) UBUNTU_IMAGE_ID=ami-978d27ee
+  eu-west-1) UBUNTU_IMAGE_ID=ami-3b5f535b
   ;;
-  ap-southeast-1) UBUNTU_IMAGE_ID=ami-81a5f0e2
+  ap-southeast-1) UBUNTU_IMAGE_ID=ami-26fc875a
   ;;
-  us-west-1) UBUNTU_IMAGE_ID=ami-499ea729
+  us-west-1) UBUNTU_IMAGE_ID=ami-b87819c1
   ;;
-  eu-central-1) UBUNTU_IMAGE_ID=ami-b52babda
+  eu-central-1) UBUNTU_IMAGE_ID=ami-dd51c9b2
   ;;
-  sa-east-1) UBUNTU_IMAGE_ID=ami-790b4e15
+  sa-east-1) UBUNTU_IMAGE_ID=ami-bc9bd7d0
   ;;
-  ap-southeast-2) UBUNTU_IMAGE_ID=ami-10ca2172
+  ap-southeast-2) UBUNTU_IMAGE_ID=ami-78ac551a
   ;;
-  ap-northeast-2) UBUNTU_IMAGE_ID=ami-d2dd7abc
+  ap-northeast-2) UBUNTU_IMAGE_ID=ami-5771d239
   ;;
-  us-west-2) UBUNTU_IMAGE_ID=ami-64c4171c
+  us-west-2) UBUNTU_IMAGE_ID=ami-70873908
   ;;
-  us-east-2) UBUNTU_IMAGE_ID=ami-69341a0c
+  us-east-2) UBUNTU_IMAGE_ID=ami-6a5f6a0f
   ;;
-  eu-west-2) UBUNTU_IMAGE_ID=ami-790d121d
+  eu-west-2) UBUNTU_IMAGE_ID=ami-261a0042
+  ;;
+  ca-central-1) UBUNTU_IMAGE_ID=ami-043fba60
+  ;;
+  eu-west-3) UBUNTU_IMAGE_ID=ami-d7ce78aa
   ;;
 esac
 echo "The image for region '$DEFAULT_REGION' is '$UBUNTU_IMAGE_ID' ..."
 
 # Launch our instance, which ec2_bootstrap.sh will initialize, store the ReservationId in a file
 echo "" | tee -a $LOG_FILE
-echo "Initializing EBS optimized r3.xlarge EC2 instance in region '$DEFAULT_REGION' with security group 'agile_data_science', key name 'agile_data_science' and image id '$UBUNTU_IMAGE_ID' using the script 'aws/ec2_bootstrap.sh'" | tee -a $LOG_FILE
+echo "Initializing EBS optimized r4.xlarge EC2 instance in region '$DEFAULT_REGION' with security group 'agile_data_science', key name 'agile_data_science' and image id '$UBUNTU_IMAGE_ID' using the script 'aws/ec2_bootstrap.sh'" | tee -a $LOG_FILE
 aws ec2 run-instances \
     --image-id $UBUNTU_IMAGE_ID \
     --security-groups agile_data_science \
     --key-name agile_data_science \
+    --instance-type r4.xlarge \
     --user-data file://aws/ec2_bootstrap.sh \
-    --instance-type r3.xlarge \
     --ebs-optimized \
-    --block-device-mappings '{"DeviceName":"/dev/sda1","Ebs":{"DeleteOnTermination":true,"VolumeSize":1024}}' \
+    --block-device-mappings '{"DeviceName":"/dev/sda1","Ebs":{"DeleteOnTermination":true,"VolumeSize":256}}' \
     --count 1 \
 | jq .ReservationId | tr -d '"' > .reservation_id
 
