@@ -90,26 +90,27 @@ git clone https://github.com/rjurney/Agile_Data_Code_2
 cd /home/ubuntu/Agile_Data_Code_2
 export PROJECT_HOME=/home/ubuntu/Agile_Data_Code_2
 echo "export PROJECT_HOME=/home/ubuntu/Agile_Data_Code_2" | sudo tee -a /home/ubuntu/.bash_profile
-conda install python=3.5
-conda install iso8601 numpy scipy scikit-learn matplotlib ipython jupyter
+conda install -y python=3.5
+conda install -y iso8601 numpy scipy scikit-learn matplotlib ipython jupyter
 pip install bs4 Flask beautifulsoup4 frozendict geopy kafka-python py4j pymongo pyelasticsearch requests selenium tabulate tldextract wikipedia findspark
 sudo chown -R ubuntu /home/ubuntu/Agile_Data_Code_2
 sudo chgrp -R ubuntu /home/ubuntu/Agile_Data_Code_2
 cd /home/ubuntu
 
 # Install commons-httpclient
-curl -Lko lib/commons-httpclient-3.1.jar http://central.maven.org/maven2/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
+curl -Lko /home/ubuntu/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar http://central.maven.org/maven2/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
 
 #
 # Install Hadoop
 #
-echo "Downloading and installing Hadoop 2.8.1 ..." | tee -a $LOG_FILE
-curl -Lko /tmp/hadoop-2.8.1.tar.gz http://apache.mirrors.tds.net/hadoop/common/hadoop-2.8.1/hadoop-2.8.1.tar.gz
+echo "" | tee -a $LOG_FILE
+echo "Downloading and installing Hadoop 3.0.0 ..." | tee -a $LOG_FILE
+curl -Lko /tmp/hadoop-3.0.0.tar.gz http://apache.mirrors.lucidnetworks.net/hadoop/common/hadoop-3.0.0/hadoop-3.0.0.tar.gz
 mkdir -p /home/ubuntu/hadoop
 cd /home/ubuntu/
-tar -xvf /tmp/hadoop-2.8.1.tar.gz -C hadoop --strip-components=1
+tar -xvf /tmp/hadoop-3.0.0.tar.gz -C hadoop --strip-components=1
 
-echo "Configuring Hadoop 2.8.1 ..." | tee -a $LOG_FILE
+echo "Configuring Hadoop 3.0.0 ..." | tee -a $LOG_FILE
 echo "" >> /home/ubuntu/.bash_profile
 echo '# Hadoop environment setup' | sudo tee -a /home/ubuntu/.bash_profile
 export HADOOP_HOME=/home/ubuntu/hadoop
@@ -129,13 +130,14 @@ sudo chgrp -R ubuntu /home/ubuntu/hadoop
 #
 # Install Spark
 #
-echo "Downloading and installing Spark 2.2.0 ..." | tee -a $LOG_FILE
-curl -Lko /tmp/spark-2.2.0-bin-without-hadoop.tgz https://d3kbcqa49mib13.cloudfront.net/spark-2.2.0-bin-without-hadoop.tgz
+echo "" | tee -a $LOG_FILE
+echo "Downloading and installing Spark 2.2.1 ..." | tee -a $LOG_FILE
+curl -Lko /tmp/spark-2.2.1-bin-without-hadoop.tgz http://apache.mirrors.lucidnetworks.net/spark/spark-2.2.1/spark-2.2.1-bin-hadoop2.7.tgz
 mkdir -p /home/ubuntu/spark
 cd /home/ubuntu
-tar -xvf /tmp/spark-2.2.0-bin-without-hadoop.tgz -C spark --strip-components=1
+tar -xvf /tmp/spark-2.2.1-bin-without-hadoop.tgz -C spark --strip-components=1
 
-echo "Configuring Spark 2.2.0 ..." | tee -a $LOG_FILE
+echo "Configuring Spark 2.2.1 ..." | tee -a $LOG_FILE
 echo "" >> /home/ubuntu/.bash_profile
 echo "# Spark environment setup" | sudo tee -a /home/ubuntu/.bash_profile
 export SPARK_HOME=/home/ubuntu/spark
@@ -168,6 +170,7 @@ sudo chgrp -R ubuntu /home/ubuntu/spark
 #
 # Install MongoDB and dependencies
 #
+echo "" | tee -a $LOG_FILE
 echo "Installing MongoDB via apt-get ..." | tee -a $LOG_FILE
 sudo apt-get install -y mongodb
 sudo mkdir -p /data/db
@@ -176,13 +179,14 @@ sudo chgrp -R mongodb /data/db
 
 # run MongoDB as daemon
 echo "Running MongoDB as a daemon ..." | tee -a $LOG_FILE
-sudo /usr/bin/mongod --fork --logpath /var/log/mongodb.log
+sudo systemctl start mongodb
 
 # Get the MongoDB Java Driver
 echo "Fetching the MongoDB Java driver ..." | tee -a $LOG_FILE
 curl -Lko /home/ubuntu/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar http://central.maven.org/maven2/org/mongodb/mongo-java-driver/3.4.2/mongo-java-driver-3.4.2.jar
 
 # Install the mongo-hadoop project in the mongo-hadoop directory in the root of our project.
+echo "" | tee -a $LOG_FILE
 echo "Downloading and installing the mongo-hadoop project version 2.0.2 ..." | tee -a $LOG_FILE
 curl -Lko /tmp/mongo-hadoop-r2.0.2.tar.gz https://github.com/mongodb/mongo-hadoop/archive/r2.0.2.tar.gz
 mkdir /home/ubuntu/mongo-hadoop
@@ -204,6 +208,7 @@ cd /home/ubuntu/mongo-hadoop/spark/src/main/python
 python setup.py install
 cp /home/ubuntu/mongo-hadoop/spark/src/main/python/pymongo_spark.py /home/ubuntu/Agile_Data_Code_2/lib/
 export PYTHONPATH=$PYTHONPATH:$PROJECT_HOME/lib
+echo "" | sudo tee -a /home/ubuntu/.bash_profile
 echo 'export PYTHONPATH=$PYTHONPATH:$PROJECT_HOME/lib' | sudo tee -a /home/ubuntu/.bash_profile
 cd /home/ubuntu
 
@@ -213,34 +218,31 @@ rm -rf /home/ubuntu/mongo-hadoop
 #
 # Install ElasticSearch in the elasticsearch directory in the root of our project, and the Elasticsearch for Hadoop package
 #
-echo "Downloading and installing Elasticsearch version 5.5.1 ..." | tee -a $LOG_FILE
-curl -Lko /tmp/elasticsearch-5.5.1.tar.gz https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.5.1.tar.gz
-mkdir /home/ubuntu/elasticsearch
-cd /home/ubuntu
-tar -xvzf /tmp/elasticsearch-5.5.1.tar.gz -C elasticsearch --strip-components=1
-sudo chown -R ubuntu /home/ubuntu/elasticsearch
-sudo chgrp -R ubuntu /home/ubuntu/elasticsearch
-sudo mkdir -p /home/ubuntu/elasticsearch/logs
-sudo chown -R ubuntu /home/ubuntu/elasticsearch/logs
-sudo chgrp -R ubuntu /home/ubuntu/elasticsearch/logs
+echo "" | tee -a $LOG_FILE
+echo "Downloading and installing Elasticsearch version 6.1.3 ..." | tee -a $LOG_FILE
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+sudo apt-get install -y apt-transport-https
+echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
+sudo apt-get update && sudo apt-get install elasticsearch
 
-# Run elasticsearch
-echo "Running Elasticsearch as a daemon ..." | tee -a $LOG_FILE
-sudo -u ubuntu /home/ubuntu/elasticsearch/bin/elasticsearch -d # re-run if you shutdown your computer
+echo "Setting up Elasticsearch to run as a daemon..."
+sudo update-rc.d elasticsearch defaults 95 10
+sudo /etc/init.d/elasticsearch start
 
 # Run a query to test - it will error but should return json
 echo "Testing Elasticsearch with a query ..." | tee -a $LOG_FILE
 curl 'localhost:9200/agile_data_science/on_time_performance/_search?q=Origin:ATL&pretty'
 
 # Install Elasticsearch for Hadoop
+echo "" | tee -a $LOG_FILE
 echo "Installing and configuring Elasticsearch for Hadoop/Spark version 5.5.1 ..." | tee -a $LOG_FILE
-curl -Lko /tmp/elasticsearch-hadoop-5.5.1.zip http://download.elastic.co/hadoop/elasticsearch-hadoop-5.5.1.zip
-unzip /tmp/elasticsearch-hadoop-5.5.1.zip
-mv /home/ubuntu/elasticsearch-hadoop-5.5.1 /home/ubuntu/elasticsearch-hadoop
-cp /home/ubuntu/elasticsearch-hadoop/dist/elasticsearch-hadoop-5.5.1.jar /home/ubuntu/Agile_Data_Code_2/lib/
-cp /home/ubuntu/elasticsearch-hadoop/dist/elasticsearch-spark-20_2.10-5.5.1.jar /home/ubuntu/Agile_Data_Code_2/lib/
+curl -Lko /tmp/elasticsearch-hadoop-6.1.3.zip http://download.elastic.co/hadoop/elasticsearch-hadoop-6.1.3.zip
+unzip /tmp/elasticsearch-hadoop-6.1.3.zip
+mv /home/ubuntu/elasticsearch-hadoop-6.1.3 /home/ubuntu/elasticsearch-hadoop
+cp /home/ubuntu/elasticsearch-hadoop/dist/elasticsearch-hadoop-6.1.3.jar /home/ubuntu/Agile_Data_Code_2/lib/
+cp /home/ubuntu/elasticsearch-hadoop/dist/elasticsearch-spark-20_2.10-6.1.3.jar /home/ubuntu/Agile_Data_Code_2/lib/
 echo "spark.speculation false" | sudo tee -a /home/ubuntu/spark/conf/spark-defaults.conf
-rm -f /tmp/elasticsearch-hadoop-5.5.1.zip
+rm -f /tmp/elasticsearch-hadoop-6.1.3.zip
 rm -rf /home/ubuntu/elasticsearch-hadoop/conf/spark-defaults.conf
 
 #
@@ -248,24 +250,25 @@ rm -rf /home/ubuntu/elasticsearch-hadoop/conf/spark-defaults.conf
 #
 
 # Install and add snappy-java and lzo-java to our classpath below via spark.jars
+echo "" | tee -a $LOG_FILE
 echo "Installing snappy-java and lzo-java and adding them to our classpath ..." | tee -a $LOG_FILE
 cd /home/ubuntu/Agile_Data_Code_2
-curl -Lko lib/snappy-java-1.1.2.6.jar http://central.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.2.6/snappy-java-1.1.2.6.jar
-curl -Lko lib/lzo-hadoop-1.0.5.jar http://central.maven.org/maven2/org/anarres/lzo/lzo-hadoop/1.0.0/lzo-hadoop-1.0.0.jar
+curl -Lko lib/snappy-java-1.1.7.1.jar http://central.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.7.1/snappy-java-1.1.7.1.jar
+curl -Lko lib/lzo-hadoop-1.0.5.jar http://central.maven.org/maven2/org/anarres/lzo/lzo-hadoop/1.0.5/lzo-hadoop-1.0.5.jar
 cd /home/ubuntu
 
 # Set the spark.jars path
-echo "spark.jars /home/ubuntu/Agile_Data_Code_2/lib/mongo-hadoop-spark-2.0.2.jar,/home/ubuntu/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar,/home/ubuntu/Agile_Data_Code_2/lib/mongo-hadoop-2.0.2.jar,/home/ubuntu/Agile_Data_Code_2/lib/elasticsearch-spark-20_2.10-5.5.1.jar,/home/ubuntu/Agile_Data_Code_2/lib/snappy-java-1.1.2.6.jar,/home/ubuntu/Agile_Data_Code_2/lib/lzo-hadoop-1.0.5.jar,/home/ubuntu/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar" | sudo tee -a /home/ubuntu/spark/conf/spark-defaults.conf
+echo "spark.jars /home/ubuntu/Agile_Data_Code_2/lib/mongo-hadoop-spark-2.0.2.jar,/home/ubuntu/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar,/home/ubuntu/Agile_Data_Code_2/lib/mongo-hadoop-2.0.2.jar,/home/ubuntu/Agile_Data_Code_2/lib/elasticsearch-spark-20_2.10-6.1.3.jar,/home/ubuntu/Agile_Data_Code_2/lib/snappy-java-1.1.7.1.jar,/home/ubuntu/Agile_Data_Code_2/lib/lzo-hadoop-1.0.5.jar,/home/ubuntu/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar" | sudo tee -a /home/ubuntu/spark/conf/spark-defaults.conf
 
 #
 # Kafka install and setup
 #
-echo "Downloading and installing Kafka version 0,11.0.0 for Spark 2.11 ..." | tee -a $LOG_FILE
-curl -Lko /tmp/kafka_2.11-0.11.0.0.tgz http://mirror.nexcess.net/apache/kafka/0.11.0.0/kafka_2.11-0.11.0.0.tgz
+echo "" | tee -a $LOG_FILE
+echo "Downloading and installing Kafka version 1.0.0 for Spark 2.11 ..." | tee -a $LOG_FILE
+curl -Lko /tmp/kafka_2.11-1.0.0.tgz http://apache.mirrors.lucidnetworks.net/kafka/1.0.0/kafka_2.11-1.0.0.tgz
 mkdir -p /home/ubuntu/kafka
 cd /home/ubuntu/
-tar -xvzf /tmp/kafka_2.11-0.11.0.0.tgz -C kafka --strip-components=1 && rm -f /tmp/kafka_2.11-0.11.0.0.tgz
-rm -f /tmp/kafka_2.11-0.11.0.0.tgz
+tar -xvzf /tmp/kafka_2.11-1.0.0.tgz -C kafka --strip-components=1 && rm -f /tmp/kafka_2.11-1.0.0.tgz
 
 # Give to ubuntu
 echo "Giving Kafka to user ubuntu ..." | tee -a $LOG_FILE
@@ -285,6 +288,7 @@ sudo -H -u ubuntu /home/ubuntu/kafka/bin/kafka-server-start.sh -daemon /home/ubu
 #
 # Install and setup Airflow
 #
+echo "" | tee -a $LOG_FILE
 echo "Installing Airflow via pip ..." | tee -a $LOG_FILE
 pip install airflow[hive]
 mkdir /home/ubuntu/airflow
@@ -297,24 +301,37 @@ sudo chown -R ubuntu /home/ubuntu/airflow
 sudo chgrp -R ubuntu /home/ubuntu/airflow
 
 airflow initdb
-airflow webserver -D
-airflow scheduler -D
+airflow webserver -D &
+airflow scheduler -D &
 
 echo "Giving airflow directory to user ubuntu yet again ..." | tee -a $LOG_FILE
 sudo chown -R ubuntu /home/ubuntu/airflow
 sudo chgrp -R ubuntu /home/ubuntu/airflow
 
 echo "Adding chown airflow commands to /home/ubuntu/.bash_profile ..." | tee -a $LOG_FILE
-echo "sudo chown -R ubuntu /home/ubuntu/airflow" >> /home/ubuntu/.bash_profile
-echo "sudo chgrp -R ubuntu /home/ubuntu/airflow" >> /home/ubuntu/.bash_profile
+echo "sudo chown -R ubuntu /home/ubuntu/airflow" | sudo tee -a /home/ubuntu/.bash_profile
+echo "sudo chgrp -R ubuntu /home/ubuntu/airflow" | sudo tee -a /home/ubuntu/.bash_profile
 
 # Jupyter server setup
+echo "" | tee -a $LOG_FILE
 echo "Starting Jupyter notebook server ..." | tee -a $LOG_FILE
 jupyter-notebook --generate-config
 cp /home/ubuntu/Agile_Data_Code_2/jupyter_notebook_config.py /home/ubuntu/.jupyter/
 cd /home/ubuntu/Agile_Data_Code_2
 jupyter-notebook --ip=0.0.0.0 &
 cd
+
+# Install and setup JanusGraph
+echo "Installing JanusGraph ..." | tee -a $LOG_FILE
+cd
+curl -Lko /tmp/janusgraph-0.2.0-hadoop2.zip \
+  https://github.com/JanusGraph/janusgraph/releases/download/v0.2.0/janusgraph-0.2.0-hadoop2.zip
+unzip -d . /tmp/janusgraph-0.2.0-hadoop2.zip
+mv janusgraph-0.2.0-hadoop2 janusgraph
+
+# make sure we own ~/.bash_profile
+sudo chgrp ubuntu ~/.bash_profile
+sudo chown ubuntu ~/.bash_profile
 
 #
 # Cleanup
