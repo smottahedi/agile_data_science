@@ -154,7 +154,7 @@ cp /home/ubuntu/spark/conf/spark-defaults.conf.template /home/ubuntu/spark/conf/
 echo 'spark.io.compression.codec org.apache.spark.io.SnappyCompressionCodec' | sudo tee -a /home/ubuntu/spark/conf/spark-defaults.conf
 
 # Give Spark 25GB of RAM, use Python3
-echo "spark.driver.memory 25g" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
+echo "spark.driver.memory 40g" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
 echo "PYSPARK_PYTHON=python3" | sudo tee -a $SPARK_HOME/conf/spark-env.sh
 echo "PYSPARK_DRIVER_PYTHON=python3" | sudo tee -a $SPARK_HOME/conf/spark-env.sh
 
@@ -313,21 +313,23 @@ echo "sudo chown -R ubuntu /home/ubuntu/airflow" | sudo tee -a /home/ubuntu/.bas
 echo "sudo chgrp -R ubuntu /home/ubuntu/airflow" | sudo tee -a /home/ubuntu/.bash_profile
 
 # Jupyter server setup
-echo "" | tee -a $LOG_FILE
-echo "Starting Jupyter notebook server ..." | tee -a $LOG_FILE
-jupyter-notebook --generate-config
-cp /home/ubuntu/Agile_Data_Code_2/jupyter_notebook_config.py /home/ubuntu/.jupyter/
-cd /home/ubuntu/Agile_Data_Code_2
-jupyter-notebook --ip=0.0.0.0 &
-cd
+# echo "" | tee -a $LOG_FILE
+# echo "Starting Jupyter notebook server ..." | tee -a $LOG_FILE
+# jupyter-notebook --generate-config
+# cp /home/ubuntu/Agile_Data_Code_2/jupyter_notebook_config.py /home/ubuntu/.jupyter/
+# cd /home/ubuntu/Agile_Data_Code_2
+# jupyter-notebook --ip=0.0.0.0 &
+# cd
 
 # Install and setup JanusGraph
+echo "" | tee -a $LOG_FILE
 echo "Installing JanusGraph ..." | tee -a $LOG_FILE
 cd
 curl -Lko /tmp/janusgraph-0.2.0-hadoop2.zip \
   https://github.com/JanusGraph/janusgraph/releases/download/v0.2.0/janusgraph-0.2.0-hadoop2.zip
 unzip -d . /tmp/janusgraph-0.2.0-hadoop2.zip
 mv janusgraph-0.2.0-hadoop2 janusgraph
+rm /tmp/janusgraph-0.2.0-hadoop2.zip
 
 # make sure we own ~/.bash_profile
 sudo chgrp ubuntu ~/.bash_profile
