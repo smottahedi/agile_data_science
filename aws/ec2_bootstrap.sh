@@ -154,7 +154,8 @@ cp /home/ubuntu/spark/conf/spark-defaults.conf.template /home/ubuntu/spark/conf/
 echo 'spark.io.compression.codec org.apache.spark.io.SnappyCompressionCodec' | sudo tee -a /home/ubuntu/spark/conf/spark-defaults.conf
 
 # Give Spark 25GB of RAM, use Python3
-echo "spark.driver.memory 40g" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
+echo "spark.driver.memory 50g" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
+echo "spark.executor.cores 12" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
 echo "PYSPARK_PYTHON=python3" | sudo tee -a $SPARK_HOME/conf/spark-env.sh
 echo "PYSPARK_DRIVER_PYTHON=python3" | sudo tee -a $SPARK_HOME/conf/spark-env.sh
 
@@ -245,6 +246,9 @@ echo "spark.speculation false" | sudo tee -a /home/ubuntu/spark/conf/spark-defau
 rm -f /tmp/elasticsearch-hadoop-6.1.3.zip
 rm -rf /home/ubuntu/elasticsearch-hadoop/conf/spark-defaults.conf
 
+sudo chgrp -R ubuntu /home/ubuntu/elasticsearch-hadoop
+sudo chown -R ubuntu /home/ubuntu/elasticsearch-hadoop
+
 #
 # Spark jar setup
 #
@@ -321,6 +325,21 @@ echo "sudo chgrp -R ubuntu /home/ubuntu/airflow" | sudo tee -a /home/ubuntu/.bas
 # jupyter-notebook --ip=0.0.0.0 &
 # cd
 
+# Install Ant to build Cassandra
+sudo apt-get install -y ant
+
+# Install Cassandra - must build from source as the latest 3.11.1 build is broken...
+echo "" | tee -a $LOG_FILE
+echo "Installing Cassandra ..."
+git clone https://github.com/apache/cassandra
+cd cassandra
+git checkout cassandra-3.11
+ant
+bin/cassandra
+export PATH=$PATH:/home/ubuntu/cassandra/bin
+echo 'export PATH=$PATH:/home/ubuntu/cassandra/bin' | sudo tee -a /home/ubuntu/.bash_profile
+cd ..
+
 # Install and setup JanusGraph
 echo "" | tee -a $LOG_FILE
 echo "Installing JanusGraph ..." | tee -a $LOG_FILE
@@ -331,7 +350,7 @@ unzip -d . /tmp/janusgraph-0.2.0-hadoop2.zip
 mv janusgraph-0.2.0-hadoop2 janusgraph
 rm /tmp/janusgraph-0.2.0-hadoop2.zip
 
-# make sure we own ~/.bash_profile
+# make sure we own ~/.bash_profile after all the 'sudo tee'
 sudo chgrp ubuntu ~/.bash_profile
 sudo chown ubuntu ~/.bash_profile
 
