@@ -105,7 +105,7 @@ curl -Lko /home/ubuntu/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar http://c
 #
 echo "" | tee -a $LOG_FILE
 echo "Downloading and installing Hadoop 3.0.1 ..." | tee -a $LOG_FILE
-curl -Lko /tmp/hadoop-3.0.1.tar.gz http://apache.mirrors.lucidnetworks.net/hadoop/common/hadoop-3.0.1/hadoop-3.0.1.tar.gz
+curl -Lko /tmp/hadoop-3.0.1.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-3.0.1/hadoop-3.0.1.tar.gz
 mkdir -p /home/ubuntu/hadoop
 cd /home/ubuntu/
 tar -xvf /tmp/hadoop-3.0.1.tar.gz -C hadoop --strip-components=1
@@ -219,16 +219,19 @@ rm -rf /home/ubuntu/mongo-hadoop
 #
 # Install ElasticSearch in the elasticsearch directory in the root of our project, and the Elasticsearch for Hadoop package
 #
-echo "" | tee -a $LOG_FILE
-echo "Downloading and installing Elasticsearch version 6.1.3 ..." | tee -a $LOG_FILE
-wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-sudo apt-get install -y apt-transport-https
-echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
-sudo apt-get update && sudo apt-get install elasticsearch
+echo "curl -sLko /tmp/elasticsearch-5.2.1.tar.gz https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.2.1.tar.gz"
+curl -sLko /tmp/elasticsearch-5.2.1.tar.gz https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.2.1.tar.gz
+mkdir /home/ubuntu/elasticsearch
+cd /home/ubuntu
+tar -xvzf /tmp/elasticsearch-5.2.1.tar.gz -C elasticsearch --strip-components=1
+sudo chown -R ubuntu /home/ubuntu/elasticsearch
+sudo chgrp -R ubuntu /home/ubuntu/elasticsearch
+sudo mkdir -p /home/ubuntu/elasticsearch/logs
+sudo chown -R ubuntu /home/ubuntu/elasticsearch/logs
+sudo chgrp -R ubuntu /home/ubuntu/elasticsearch/logs
 
-echo "Setting up Elasticsearch to run as a daemon..."
-sudo update-rc.d elasticsearch defaults 95 10
-sudo /etc/init.d/elasticsearch start
+# Run elasticsearch
+sudo -u ubuntu /home/ubuntu/elasticsearch/bin/elasticsearch -d # re-run if you shutdown your computer
 
 # Run a query to test - it will error but should return json
 echo "Testing Elasticsearch with a query ..." | tee -a $LOG_FILE
