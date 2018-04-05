@@ -104,13 +104,13 @@ curl -Lko /home/ubuntu/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar http://c
 # Install Hadoop
 #
 echo "" | tee -a $LOG_FILE
-echo "Downloading and installing Hadoop 3.0.0 ..." | tee -a $LOG_FILE
-curl -Lko /tmp/hadoop-3.0.0.tar.gz http://apache.mirrors.lucidnetworks.net/hadoop/common/hadoop-3.0.0/hadoop-3.0.0.tar.gz
+echo "Downloading and installing Hadoop 3.0.1 ..." | tee -a $LOG_FILE
+curl -Lko /tmp/hadoop-3.0.1.tar.gz http://apache.mirrors.lucidnetworks.net/hadoop/common/hadoop-3.0.1/hadoop-3.0.1.tar.gz
 mkdir -p /home/ubuntu/hadoop
 cd /home/ubuntu/
-tar -xvf /tmp/hadoop-3.0.0.tar.gz -C hadoop --strip-components=1
+tar -xvf /tmp/hadoop-3.0.1.tar.gz -C hadoop --strip-components=1
 
-echo "Configuring Hadoop 3.0.0 ..." | tee -a $LOG_FILE
+echo "Configuring Hadoop 3.0.1 ..." | tee -a $LOG_FILE
 echo "" >> /home/ubuntu/.bash_profile
 echo '# Hadoop environment setup' | sudo tee -a /home/ubuntu/.bash_profile
 export HADOOP_HOME=/home/ubuntu/hadoop
