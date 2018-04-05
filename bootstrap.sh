@@ -55,7 +55,7 @@ curl -Lko /home/vagrant/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar http://
 #
 # Install Hadoop
 #
-curl -Lko /tmp/hadoop-3.0.1.tar.gz http://apache.mirrors.lucidnetworks.net/hadoop/common/hadoop-3.0.1/hadoop-3.0.1.tar.gz
+curl -Lko /tmp/hadoop-3.0.1.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-3.0.1/hadoop-3.0.1.tar.gz
 mkdir -p /home/vagrant/hadoop
 cd /home/vagrant/
 tar -xvf /tmp/hadoop-3.0.1.tar.gz -C hadoop --strip-components=1
