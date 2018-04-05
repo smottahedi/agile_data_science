@@ -14,7 +14,6 @@ echo "Updating motd boot message with instructions for the user of the image ...
 sudo apt-get install -y update-motd
 cat > /home/ubuntu/agile_data_science.message << END_HELLO
 
-
 ------------------------------------------------------------------------------------------------------------------------
 Welcome to Agile Data Science 2.0!
 
@@ -92,7 +91,7 @@ export PROJECT_HOME=/home/ubuntu/Agile_Data_Code_2
 echo "export PROJECT_HOME=/home/ubuntu/Agile_Data_Code_2" | sudo tee -a /home/ubuntu/.bash_profile
 conda install -y python=3.5
 conda install -y iso8601 numpy scipy scikit-learn matplotlib ipython jupyter
-pip install bs4 Flask beautifulsoup4 frozendict geopy kafka-python py4j pymongo pyelasticsearch requests selenium tabulate tldextract wikipedia findspark
+pip install -r requirements.txt
 sudo chown -R ubuntu /home/ubuntu/Agile_Data_Code_2
 sudo chgrp -R ubuntu /home/ubuntu/Agile_Data_Code_2
 cd /home/ubuntu
