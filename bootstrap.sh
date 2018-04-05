@@ -6,7 +6,7 @@ sudo chgrp -R vagrant /home/vagrant
 #
 # Update & install dependencies
 #
-sudo apt-get update
+sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::options::="--force-confdef" -o DPkg::options::="--force-confold" upgrade
 sudo apt-get install -y zip unzip curl bzip2 python-dev build-essential git libssl1.0.0 libssl-dev \
     software-properties-common debconf-utils python-software-properties
 
@@ -24,8 +24,7 @@ echo "export JAVA_HOME=/usr/lib/jvm/java-8-oracle" | sudo tee -a /home/vagrant/.
 #
 # Install Miniconda
 #
-echo "curl -sLko /tmp/Miniconda3-latest-Linux-x86_64.sh https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-curl -sLko /tmp/Miniconda3-latest-Linux-x86_64.sh https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+curl -Lko /tmp/Miniconda3-latest-Linux-x86_64.sh https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 chmod +x /tmp/Miniconda3-latest-Linux-x86_64.sh
 /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /home/vagrant/anaconda
 
@@ -35,9 +34,6 @@ echo 'export PATH=/home/vagrant/anaconda/bin:$PATH' | sudo tee -a /home/vagrant/
 sudo chown -R vagrant /home/vagrant/anaconda
 sudo chgrp -R vagrant /home/vagrant/anaconda
 
-#sudo apt-get install -y python3 python3-dev python3-numpy python3-scipy python3-setuptools
-#sudo easy_install3 pip
-
 #
 # Install Clone repo, install Python dependencies
 #
@@ -46,23 +42,25 @@ git clone https://github.com/rjurney/Agile_Data_Code_2
 cd /home/vagrant/Agile_Data_Code_2
 export PROJECT_HOME=/home/vagrant/Agile_Data_Code_2
 echo "export PROJECT_HOME=/home/vagrant/Agile_Data_Code_2" | sudo tee -a /home/vagrant/.bash_profile
-conda install python=3.5
-conda install iso8601 numpy scipy scikit-learn matplotlib ipython jupyter
-pip install bs4 Flask beautifulsoup4 airflow frozendict geopy kafka-python py4j pymongo pyelasticsearch requests selenium tabulate tldextract wikipedia findspark
+conda install -y python=3.5
+conda install -y iso8601 numpy scipy scikit-learn matplotlib ipython jupyter
+pip install bs4 Flask beautifulsoup4 frozendict geopy kafka-python py4j pymongo pyelasticsearch requests selenium tabulate tldextract wikipedia findspark
 sudo chown -R vagrant /home/vagrant/Agile_Data_Code_2
 sudo chgrp -R vagrant /home/vagrant/Agile_Data_Code_2
 cd /home/vagrant
 
+# Install commons-httpclient
+curl -Lko /home/vagrant/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar http://central.maven.org/maven2/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
+
 #
 # Install Hadoop
 #
-echo "curl -sLko /tmp/hadoop-2.8.2.tar.gz http://apache.osuosl.org/hadoop/common/hadoop-2.8.2/hadoop-2.8.2.tar.gz"
-curl -sLko /tmp/hadoop-2.8.2.tar.gz http://apache.osuosl.org/hadoop/common/hadoop-2.8.2/hadoop-2.8.2.tar.gz
+curl -Lko /tmp/hadoop-3.0.1.tar.gz http://apache.mirrors.lucidnetworks.net/hadoop/common/hadoop-3.0.1/hadoop-3.0.1.tar.gz
 mkdir -p /home/vagrant/hadoop
 cd /home/vagrant/
-tar -xvf /tmp/hadoop-2.8.2.tar.gz -C hadoop --strip-components=1
+tar -xvf /tmp/hadoop-3.0.1.tar.gz -C hadoop --strip-components=1
 
-echo '# Hadoop environment setup' | sudo tee -a /home/vagrant/.bash_profile
+echo "" >> /home/vagrant/.bash_profile
 export HADOOP_HOME=/home/vagrant/hadoop
 echo 'export HADOOP_HOME=/home/vagrant/hadoop' | sudo tee -a /home/vagrant/.bash_profile
 export PATH=$PATH:$HADOOP_HOME/bin
@@ -73,17 +71,19 @@ export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 echo 'export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop' | sudo tee -a /home/vagrant/.bash_profile
 
 # Give to vagrant
+echo "Giving hadoop to user vagrant ..." | tee -a $LOG_FILE
 sudo chown -R vagrant /home/vagrant/hadoop
 sudo chgrp -R vagrant /home/vagrant/hadoop
 
 #
 # Install Spark
 #
-echo "curl -sLko /tmp/spark-2.1.0-bin-without-hadoop.tgz http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-without-hadoop.tgz"
-curl -sLko /tmp/spark-2.1.0-bin-without-hadoop.tgz http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-without-hadoop.tgz
+echo "" | tee -a $LOG_FILE
+echo "Downloading and installing Spark 2.2.1 ..." | tee -a $LOG_FILE
+curl -Lko /tmp/spark-2.2.1-bin-without-hadoop.tgz http://apache.mirrors.lucidnetworks.net/spark/spark-2.2.1/spark-2.2.1-bin-hadoop2.7.tgz
 mkdir -p /home/vagrant/spark
 cd /home/vagrant
-tar -xvf /tmp/spark-2.1.0-bin-without-hadoop.tgz -C spark --strip-components=1
+tar -xvf /tmp/spark-2.2.1-bin-without-hadoop.tgz -C spark --strip-components=1
 
 echo "" >> /home/vagrant/.bash_profile
 echo "# Spark environment setup" | sudo tee -a /home/vagrant/.bash_profile
@@ -100,8 +100,9 @@ echo 'export PATH=$PATH:$SPARK_HOME/bin' | sudo tee -a /home/vagrant/.bash_profi
 cp /home/vagrant/spark/conf/spark-defaults.conf.template /home/vagrant/spark/conf/spark-defaults.conf
 echo 'spark.io.compression.codec org.apache.spark.io.SnappyCompressionCodec' | sudo tee -a /home/vagrant/spark/conf/spark-defaults.conf
 
-# Give Spark 8GB of RAM, used Python3
-echo "spark.driver.memory 9g" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
+# Give Spark 25GB of RAM, use Python3
+echo "spark.driver.memory 6g" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
+echo "spark.executor.cores 2" | sudo tee -a $SPARK_HOME/conf/spark-defaults.conf
 echo "PYSPARK_PYTHON=python3" | sudo tee -a $SPARK_HOME/conf/spark-env.sh
 echo "PYSPARK_DRIVER_PYTHON=python3" | sudo tee -a $SPARK_HOME/conf/spark-env.sh
 
@@ -116,24 +117,19 @@ sudo chgrp -R vagrant /home/vagrant/spark
 #
 # Install MongoDB and dependencies
 #
-#echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-#sudo apt-get update
-#sudo apt-get install -y --allow-unauthenticated mongodb-org-shell mongodb-org-server mongodb-org-mongos mongodb-org-tools mongodb-org
 sudo apt-get install -y mongodb
 sudo mkdir -p /data/db
 sudo chown -R mongodb /data/db
 sudo chgrp -R mongodb /data/db
 
 # run MongoDB as daemon
-sudo /usr/bin/mongod --fork --logpath /var/log/mongodb.log
+sudo systemctl start mongodb
 
 # Get the MongoDB Java Driver
-echo "curl -sLko /home/vagrant/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar http://central.maven.org/maven2/org/mongodb/mongo-java-driver/3.4.2/mongo-java-driver-3.4.2.jar"
-curl -sLko /home/vagrant/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar http://central.maven.org/maven2/org/mongodb/mongo-java-driver/3.4.2/mongo-java-driver-3.4.2.jar
+curl -Lko /home/vagrant/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar http://central.maven.org/maven2/org/mongodb/mongo-java-driver/3.4.2/mongo-java-driver-3.4.2.jar
 
 # Install the mongo-hadoop project in the mongo-hadoop directory in the root of our project.
-echo "curl -sLko /tmp/mongo-hadoop-r2.0.2.tar.gz https://github.com/mongodb/mongo-hadoop/archive/r2.0.2.tar.gz"
-curl -sLko /tmp/mongo-hadoop-r2.0.2.tar.gz https://github.com/mongodb/mongo-hadoop/archive/r2.0.2.tar.gz
+curl -Lko /tmp/mongo-hadoop-r2.0.2.tar.gz https://github.com/mongodb/mongo-hadoop/archive/r2.0.2.tar.gz
 mkdir /home/vagrant/mongo-hadoop
 cd /home/vagrant
 tar -xvzf /tmp/mongo-hadoop-r2.0.2.tar.gz -C mongo-hadoop --strip-components=1
@@ -151,6 +147,7 @@ cd /home/vagrant/mongo-hadoop/spark/src/main/python
 python setup.py install
 cp /home/vagrant/mongo-hadoop/spark/src/main/python/pymongo_spark.py /home/vagrant/Agile_Data_Code_2/lib/
 export PYTHONPATH=$PYTHONPATH:$PROJECT_HOME/lib
+echo "" | sudo tee -a /home/vagrant/.bash_profile
 echo 'export PYTHONPATH=$PYTHONPATH:$PROJECT_HOME/lib' | sudo tee -a /home/vagrant/.bash_profile
 cd /home/vagrant
 
@@ -193,42 +190,45 @@ rm -rf /home/vagrant/elasticsearch-hadoop/conf/spark-defaults.conf
 #
 
 # Install and add snappy-java and lzo-java to our classpath below via spark.jars
+echo "" | tee -a $LOG_FILE
+echo "Installing snappy-java and lzo-java and adding them to our classpath ..." | tee -a $LOG_FILE
 cd /home/vagrant/Agile_Data_Code_2
-echo "curl -sLko lib/snappy-java-1.1.2.6.jar http://central.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.2.6/snappy-java-1.1.2.6.jar"
-curl -sLko lib/snappy-java-1.1.2.6.jar http://central.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.2.6/snappy-java-1.1.2.6.jar
-echo "curl -sLko lib/lzo-hadoop-1.0.5.jar http://central.maven.org/maven2/org/anarres/lzo/lzo-hadoop/1.0.0/lzo-hadoop-1.0.0.jar"
-curl -sLko lib/lzo-hadoop-1.0.5.jar http://central.maven.org/maven2/org/anarres/lzo/lzo-hadoop/1.0.0/lzo-hadoop-1.0.0.jar
+curl -Lko lib/snappy-java-1.1.7.1.jar http://central.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.7.1/snappy-java-1.1.7.1.jar
+curl -Lko lib/lzo-hadoop-1.0.5.jar http://central.maven.org/maven2/org/anarres/lzo/lzo-hadoop/1.0.5/lzo-hadoop-1.0.5.jar
 cd /home/vagrant
 
 # Set the spark.jars path
-echo "spark.jars /home/vagrant/Agile_Data_Code_2/lib/mongo-hadoop-spark-2.0.2.jar,/home/vagrant/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar,/home/vagrant/Agile_Data_Code_2/lib/mongo-hadoop-2.0.2.jar,/home/vagrant/Agile_Data_Code_2/lib/elasticsearch-spark-20_2.10-5.2.1.jar,/home/vagrant/Agile_Data_Code_2/lib/snappy-java-1.1.2.6.jar,/home/vagrant/Agile_Data_Code_2/lib/lzo-hadoop-1.0.5.jar" | sudo tee -a /home/vagrant/spark/conf/spark-defaults.conf
+echo "spark.jars /home/vagrant/Agile_Data_Code_2/lib/mongo-hadoop-spark-2.0.2.jar,/home/vagrant/Agile_Data_Code_2/lib/mongo-java-driver-3.4.2.jar,/home/vagrant/Agile_Data_Code_2/lib/mongo-hadoop-2.0.2.jar,/home/vagrant/Agile_Data_Code_2/lib/elasticsearch-spark-20_2.10-5.2.1.jar,/home/vagrant/Agile_Data_Code_2/lib/snappy-java-1.1.7.1.jar,/home/vagrant/Agile_Data_Code_2/lib/lzo-hadoop-1.0.5.jar,/home/vagrant/Agile_Data_Code_2/lib/commons-httpclient-3.1.jar" | sudo tee -a /home/vagrant/spark/conf/spark-defaults.conf
 
 #
 # Kafka install and setup
 #
-echo "curl -sLko /tmp/kafka_2.11-0.10.1.1.tgz http://www-us.apache.org/dist/kafka/0.10.1.1/kafka_2.11-0.10.1.1.tgz"
-curl -sLko /tmp/kafka_2.11-0.10.1.1.tgz http://www-us.apache.org/dist/kafka/0.10.1.1/kafka_2.11-0.10.1.1.tgz
+echo "" | tee -a $LOG_FILE
+echo "Downloading and installing Kafka version 1.0.0 for Spark 2.11 ..." | tee -a $LOG_FILE
+curl -Lko /tmp/kafka_2.11-1.0.0.tgz http://apache.mirrors.lucidnetworks.net/kafka/1.0.0/kafka_2.11-1.0.0.tgz
 mkdir -p /home/vagrant/kafka
 cd /home/vagrant/
-tar -xvzf /tmp/kafka_2.11-0.10.1.1.tgz -C kafka --strip-components=1 && rm -f /tmp/kafka_2.11-0.10.1.1.tgz
-rm -f /tmp/kafka_2.11-0.10.1.1.tgz
-
-# Set the log dir to kafka/logs
-sed -i '/log.dirs=\/tmp\/kafka-logs/c\log.dirs=logs' /home/vagrant/kafka/config/server.properties
+tar -xvzf /tmp/kafka_2.11-1.0.0.tgz -C kafka --strip-components=1 && rm -f /tmp/kafka_2.11-1.0.0.tgz
 
 # Give to vagrant
+echo "Giving Kafka to user vagrant ..." | tee -a $LOG_FILE
 sudo chown -R vagrant /home/vagrant/kafka
 sudo chgrp -R vagrant /home/vagrant/kafka
 
+# Set the log dir to kafka/logs
+echo "Configuring logging for kafka to go into kafka/logs directory ..." | tee -a $LOG_FILE
+sed -i '/log.dirs=\/tmp\/kafka-logs/c\log.dirs=logs' /home/vagrant/kafka/config/server.properties
+
 # Run zookeeper (which kafka depends on), then Kafka
+echo "Running Zookeeper as a daemon ..." | tee -a $LOG_FILE
 sudo -H -u vagrant /home/vagrant/kafka/bin/zookeeper-server-start.sh -daemon /home/vagrant/kafka/config/zookeeper.properties
+echo "Running Kafka Server as a daemon ..." | tee -a $LOG_FILE
 sudo -H -u vagrant /home/vagrant/kafka/bin/kafka-server-start.sh -daemon /home/vagrant/kafka/config/server.properties
 
 #
 # Install and setup Airflow
 #
 pip install airflow[hive]
-
 mkdir /home/vagrant/airflow
 mkdir /home/vagrant/airflow/dags
 mkdir /home/vagrant/airflow/logs
@@ -241,25 +241,36 @@ airflow initdb
 airflow webserver -D &
 airflow scheduler -D &
 
-# Install Apache Zeppelin
-echo "curl -sLko /tmp/zeppelin-0.7.0-bin-all.tgz http://www-us.apache.org/dist/zeppelin/zeppelin-0.7.0/zeppelin-0.7.0-bin-all.tgz"
-curl -sLko /tmp/zeppelin-0.7.0-bin-all.tgz http://www-us.apache.org/dist/zeppelin/zeppelin-0.7.0/zeppelin-0.7.0-bin-all.tgz
-mkdir zeppelin
-tar -xvzf /tmp/zeppelin-0.7.0-bin-all.tgz -C zeppelin --strip-components=1
+sudo chown -R vagrant /home/vagrant/airflow
+sudo chgrp -R vagrant /home/vagrant/airflow
 
-# Configure Zeppelin
-cp zeppelin/conf/zeppelin-env.sh.template zeppelin/conf/zeppelin-env.sh
-echo "export SPARK_HOME=$PROJECT_HOME/spark" >> zeppelin/conf/zeppelin-env.sh
-echo "export SPARK_MASTER=local" >> zeppelin/conf/zeppelin-env.sh
-echo "export SPARK_CLASSPATH=" >> zeppelin/conf/zeppelin-env.sh
+echo "sudo chown -R vagrant /home/vagrant/airflow" | sudo tee -a /home/vagrant/.bash_profile
+echo "sudo chgrp -R vagrant /home/vagrant/airflow" | sudo tee -a /home/vagrant/.bash_profile
 
-# Jupyter server setup
-jupyter notebook --generate-config
-cp /home/vagrant/Agile_Data_Code_2/jupyter_notebook_config.py /home/vagrant/.jupyter/
-mkdir /home/vagrant/certs
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:1024 -subj "/C=US" -keyout /home/vagrant/certs/mycert.pem -out /home/vagrant/certs/mycert.pem
+# Install Ant to build Cassandra
+sudo apt-get install -y ant
 
-jupyter notebook --ip=0.0.0.0 --allow-root --no-browser &
+# Install Cassandra - must build from source as the latest 3.11.1 build is broken...
+git clone https://github.com/apache/cassandra
+cd cassandra
+git checkout cassandra-3.11
+ant
+bin/cassandra
+export PATH=$PATH:/home/vagrant/cassandra/bin
+echo 'export PATH=$PATH:/home/vagrant/cassandra/bin' | sudo tee -a /home/vagrant/.bash_profile
+cd ..
+
+# Install and setup JanusGraph
+cd /home/vagrant
+curl -Lko /tmp/janusgraph-0.2.0-hadoop2.zip \
+  https://github.com/JanusGraph/janusgraph/releases/download/v0.2.0/janusgraph-0.2.0-hadoop2.zip
+unzip -d . /tmp/janusgraph-0.2.0-hadoop2.zip
+mv janusgraph-0.2.0-hadoop2 janusgraph
+rm /tmp/janusgraph-0.2.0-hadoop2.zip
+
+# make sure we own /home/vagrant/.bash_profile after all the 'sudo tee'
+sudo chgrp vagrant /home/vagrant/.bash_profile
+sudo chown vagrant /home/vagrant/.bash_profile
 
 #
 # Cleanup
