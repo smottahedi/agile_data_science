@@ -6,7 +6,7 @@ echo "Logging operations to '$LOG_FILE' ..."
 echo "" | tee -a $LOG_FILE # first echo replaces previous log output, other calls append
 echo "Welcome to Agile Data Science 2.0 :)" | tee -a $LOG_FILE
 echo "" | tee -a $LOG_FILE
-echo "I will launch an r3.xlarge instance in the default VPC for you, using a key and security group we will create." | tee -a $LOG_FILE
+echo "I will launch an r4.xlarge instance in the default VPC for you, using a key and security group we will create." | tee -a $LOG_FILE
 echo "" | tee -a $LOG_FILE
 
 echo "The utility 'jq' is required for this script to detect the hostname of your ec2 instance ..." | tee -a $LOG_FILE
