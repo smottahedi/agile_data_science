@@ -1,5 +1,6 @@
 Flask
 airflow
+beautifulsoup4 
 bs4
 frozendict
 geopy
